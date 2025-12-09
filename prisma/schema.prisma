@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String           @id @default(uuid())
+  name               String?
+  email              String           @unique
+  passwordHash       String           
+  apiKeys            ApiKey[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model RatePlan {
+  id                 String            @id  @default(uuid())
+  name               String            @unique
+  requestsPerMinute  Int
+  requestsPerHour    Int 
+  requestsPerDay     Int 
+  burstLimit         Int 
+  apiKeys            ApiKey[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model ApiKey {
+  id                 String            @id  @default(uuid())
+  userId             String
+  planId             String
+  keyHash            String            @unique
+  status             ApiKeyStatus      @default(ACTIVE)
+  lastUsedIp         String?
+  user               User              @relation(fields: [userId], references: [id])
+  plan               RatePlan          @relation(fields: [planId], references: [id])
+  usage              Usage[]
+  logs               RequestLog[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+
+  @@index([userId])
+  @@index([planId])
+  @@index([keyHash])
+}
+
+model Usage {
+  id                String              @id @default(uuid())
+  apiKeyId          String
+  peroid            UsagePeroid
+  timestampBucket   DateTime
+  requestCount      Int  @default(0)
+  apiKey            ApiKey             @relation(fields: [apiKeyId], references: [id])
+  updatedAt         DateTime           @updatedAt
+
+  @@index([apiKeyId, timestampBucket])
+}
+
+model RequestLog {
+  id                 String           @id  @default(uuid())
+  apiKeyId           String
+  ip                 String?
+  endPoint           String
+  statusCode         Int
+  responseTimeMs     Int
+  createdAt          DateTime         @default(now())
+  apiKey             ApiKey           @relation(fields: [apiKeyId], references: [id])
+
+  @@index([apiKeyId])
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  DISABLED
+  REVOKED
+}
+
+enum UsagePeroid {
+  MINUTE 
+  HOUR 
+  DAY
+}
