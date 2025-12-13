@@ -1,0 +1,124 @@
+openapi: 3.0.3
+info:
+  title: Rate Limiting API
+  version: 1.0.0
+  description: API for user auth, API key management and rate-limited endpoints.
+servers:
+  - url: http://localhost:5050
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+              required: [email, password]
+      responses:
+        '201':
+          description: Created
+  /api/v1/auth/login:
+    post:
+      summary: Login and obtain JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required: [email, password]
+      responses:
+        '200':
+          description: OK
+  /api/v1/api-keys:
+    post:
+      summary: Create an API key (requires JWT)
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: API key created
+    get:
+      summary: List API keys (requires JWT)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of keys
+  /api/v1/api-keys/{keyId}/revoke:
+    post:
+      summary: Revoke API key (requires JWT)
+      parameters:
+        - in: path
+          name: keyId
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Revoked
+  /api/v1/api-keys/{keyId}/regenerate:
+    post:
+      summary: Regenerate API key (requires JWT)
+      parameters:
+        - in: path
+          name: keyId
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Regenerated
+  /api/v1/ping:
+    get:
+      summary: Test endpoint (requires API key)
+      security:
+        - apiKeyAuth: []
+      responses:
+        '200':
+          description: Pong
+        '401':
+          description: Unauthorized
+    post:
+      summary: Test endpoint (POST)
+      security:
+        - apiKeyAuth: []
+      responses:
+        '200':
+          description: Pong
+  /api/v1/ping/stats:
+    get:
+      summary: View usage statistics (requires API key)
+      security:
+        - apiKeyAuth: []
+      responses:
+        '200':
+          description: Stats
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
