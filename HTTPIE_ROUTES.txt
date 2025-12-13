@@ -1,0 +1,494 @@
+# HTTPie Testing Commands - All Features
+
+## Installation
+```bash
+pip install httpie
+```
+
+## Test Commands by Feature
+
+---
+
+## 🔐 AUTHENTICATION ROUTES
+
+### 1. Register New User
+```bash
+http POST http://localhost:5050/api/v1/auth/register \
+  name='John Doe' \
+  email='john@example.com' \
+  password='SecurePass123!'
+```
+
+**Expected Response**: `201 Created`
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "createdAt": "2025-12-10T..."
+  }
+}
+```
+
+---
+
+### 2. Login User
+```bash
+http POST http://localhost:5050/api/v1/auth/login \
+  email='john@example.com' \
+  password='SecurePass123!'
+```
+
+**Expected Response**: `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGci...",
+    "user": {
+      "id": "uuid",
+      "name": "John Doe",
+      "email": "john@example.com"
+    }
+  }
+}
+```
+
+**💾 Save the token**:
+```bash
+JWT_TOKEN="your-token-here"
+```
+
+---
+
+## 🔑 API KEY MANAGEMENT ROUTES
+
+### 3. Create API Key
+```bash
+http POST http://localhost:5050/api/v1/api-keys \
+  Authorization:"Bearer $JWT_TOKEN"
+```
+
+**Expected Response**: `201 Created`
+```json
+{
+  "success": true,
+  "data": {
+    "id": "key-uuid",
+    "key": "rl_abc123...",
+    "maskedKey": "rl_abc...123",
+    "status": "ACTIVE"
+  }
+}
+```
+
+**💾 Save the API key**:
+```bash
+API_KEY="rl_abc123..."
+```
+
+---
+
+### 4. List All API Keys
+```bash
+http GET http://localhost:5050/api/v1/api-keys \
+  Authorization:"Bearer $JWT_TOKEN"
+```
+
+**Expected Response**: `200 OK`
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "key-uuid",
+      "maskedKey": "rl_abc...123",
+      "status": "ACTIVE"
+    }
+  ]
+}
+```
+
+---
+
+### 5. Revoke API Key
+```bash
+http POST http://localhost:5050/api/v1/api-keys/key-id/revoke \
+  Authorization:"Bearer $JWT_TOKEN"
+```
+
+**Expected Response**: `200 OK`
+```json
+{
+  "success": true,
+  "data": null,
+  "message": "API key revoked successfully"
+}
+```
+
+---
+
+### 6. Regenerate API Key
+```bash
+http POST http://localhost:5050/api/v1/api-keys/key-id/regenerate \
+  Authorization:"Bearer $JWT_TOKEN"
+```
+
+**Expected Response**: `201 Created`
+```json
+{
+  "success": true,
+  "data": {
+    "id": "new-key-uuid",
+    "key": "rl_new123...",
+    "maskedKey": "rl_new...123",
+    "status": "ACTIVE"
+  }
+}
+```
+
+---
+
+### 7. Delete API Key
+```bash
+http DELETE http://localhost:5050/api/v1/api-keys/key-id \
+  Authorization:"Bearer $JWT_TOKEN"
+```
+
+**Expected Response**: `200 OK`
+```json
+{
+  "success": true,
+  "data": null,
+  "message": "API key deleted successfully"
+}
+```
+
+---
+
+## 🛡️ PROTECTED ROUTES (API Key Required)
+
+### 8. Test Ping Endpoint (GET)
+```bash
+http GET http://localhost:5050/api/v1/ping \
+  x-api-key:"$API_KEY"
+```
+
+**Expected Response**: `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Pong! Your API key is valid.",
+    "timestamp": "2025-12-10T...",
+    "headers": {
+      "X-RateLimit-Limit": "60",
+      "X-RateLimit-Remaining": "59",
+      "X-RateLimit-Reset": "..."
+    }
+  }
+}
+```
+
+---
+
+### 9. Test Ping Endpoint (POST)
+```bash
+http POST http://localhost:5050/api/v1/ping \
+  x-api-key:"$API_KEY"
+```
+
+**Same response as GET**
+
+---
+
+### 10. Test Ping with Bearer Token
+```bash
+http GET http://localhost:5050/api/v1/ping \
+  Authorization:"Bearer $API_KEY"
+```
+
+**Same as x-api-key header**
+
+---
+
+### 11. Test Ping with Query Parameter
+```bash
+http GET http://localhost:5050/api/v1/ping \
+  apiKey=="$API_KEY"
+```
+
+**Note**: Use `==` in HTTPie for query parameters
+
+---
+
+### 12. View Usage Statistics
+```bash
+http GET http://localhost:5050/api/v1/ping/stats \
+  x-api-key:"$API_KEY"
+```
+
+**Expected Response**: `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "totalRequests": 42,
+    "usage": [
+      {
+        "period": "MINUTE",
+        "count": 12,
+        "bucket": "2025-12-10T14:32:00.000Z"
+      },
+      {
+        "period": "HOUR",
+        "count": 42,
+        "bucket": "2025-12-10T14:00:00.000Z"
+      },
+      {
+        "period": "DAY",
+        "count": 42,
+        "bucket": "2025-12-10T00:00:00.000Z"
+      }
+    ],
+    "recentRequests": [...]
+  }
+}
+```
+
+---
+
+## ❌ ERROR TESTING ROUTES
+
+### 13. Missing API Key (Should Fail)
+```bash
+http GET http://localhost:5050/api/v1/ping
+```
+
+**Expected Response**: `401 Unauthorized`
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "API key is required..."
+  }
+}
+```
+
+---
+
+### 14. Invalid API Key (Should Fail)
+```bash
+http GET http://localhost:5050/api/v1/ping \
+  x-api-key:"invalid_key_12345"
+```
+
+**Expected Response**: `401 Unauthorized`
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid or revoked API key"
+  }
+}
+```
+
+---
+
+### 15. Rate Limited (After 60 Requests/Minute)
+```bash
+http GET http://localhost:5050/api/v1/ping \
+  x-api-key:"$API_KEY"
+```
+
+**After 60 requests - Expected Response**: `429 Too Many Requests`
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Rate limit exceeded. Try again in 45 seconds"
+  }
+}
+```
+
+---
+
+## 📊 RATE LIMITING TESTING
+
+### 16. Trigger Rate Limiting (Bash Loop)
+```bash
+for i in {1..70}; do
+  http --ignore-stdin GET http://localhost:5050/api/v1/ping \
+    x-api-key:"$API_KEY"
+  echo "Request $i"
+done
+```
+
+**Expected**: Requests 1-60 succeed (200), Requests 61-70 fail (429)
+
+---
+
+### 17. Check Rate Limit Headers
+```bash
+http --headers GET http://localhost:5050/api/v1/ping \
+  x-api-key:"$API_KEY"
+```
+
+**Look for these headers**:
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
+X-RateLimit-Reset: 1702223280000
+```
+
+---
+
+### 18. Verbose Response (All Headers & Body)
+```bash
+http --verbose GET http://localhost:5050/api/v1/ping \
+  x-api-key:"$API_KEY"
+```
+
+---
+
+## 🎯 QUICK TESTING WORKFLOWS
+
+### Workflow 1: Complete Full Feature Test
+```bash
+# 1. Register
+http POST http://localhost:5050/api/v1/auth/register \
+  name='TestUser' email='test@example.com' password='TestPass123!'
+
+# 2. Login (save token manually or from previous output)
+http POST http://localhost:5050/api/v1/auth/login \
+  email='test@example.com' password='TestPass123!'
+
+# 3. Create API Key (use JWT from step 2)
+http POST http://localhost:5050/api/v1/api-keys \
+  Authorization:"Bearer JWT_TOKEN"
+
+# 4. Test protected route (use API key from step 3)
+http GET http://localhost:5050/api/v1/ping \
+  x-api-key:"API_KEY"
+
+# 5. View stats
+http GET http://localhost:5050/api/v1/ping/stats \
+  x-api-key:"API_KEY"
+```
+
+---
+
+### Workflow 2: Test All Authentication Methods
+```bash
+# Method 1: x-api-key header
+http GET http://localhost:5050/api/v1/ping \
+  x-api-key:"$API_KEY"
+
+# Method 2: Bearer token
+http GET http://localhost:5050/api/v1/ping \
+  Authorization:"Bearer $API_KEY"
+
+# Method 3: Query parameter
+http GET http://localhost:5050/api/v1/ping \
+  apiKey=="$API_KEY"
+```
+
+---
+
+### Workflow 3: Test Error Cases
+```bash
+# Missing API key
+http GET http://localhost:5050/api/v1/ping
+
+# Invalid API key
+http GET http://localhost:5050/api/v1/ping \
+  x-api-key:"invalid"
+
+# Invalid JWT
+http GET http://localhost:5050/api/v1/api-keys \
+  Authorization:"Bearer invalid"
+```
+
+---
+
+### Workflow 4: Test Rate Limiting
+```bash
+# Send 70 rapid requests
+for i in {1..70}; do
+  response=$(http --ignore-stdin --print=HhBb GET http://localhost:5050/api/v1/ping \
+    x-api-key:"$API_KEY" 2>/dev/null | grep "HTTP")
+  echo "Request $i: $response"
+done
+
+# Check results - should see 429 after request 60
+```
+
+---
+
+## 💾 Useful HTTPie Flags
+
+| Flag | Purpose |
+|------|---------|
+| `--print=HhBb` | Show headers and body |
+| `--headers` | Show only response headers |
+| `--body` | Show only response body |
+| `--verbose` | Maximum verbosity |
+| `--ignore-stdin` | Don't wait for stdin |
+| `-v` | Pretty format |
+| `-j` | JSON output |
+| `--auth` | Basic auth |
+| `--timeout=10` | 10 second timeout |
+
+---
+
+## 🔗 Complete Route Reference
+
+| # | Method | Route | Auth | Purpose |
+|---|--------|-------|------|---------|
+| 1 | POST | `/api/v1/auth/register` | None | Register user |
+| 2 | POST | `/api/v1/auth/login` | None | Login, get JWT |
+| 3 | POST | `/api/v1/api-keys` | JWT | Create API key |
+| 4 | GET | `/api/v1/api-keys` | JWT | List keys |
+| 5 | POST | `/api/v1/api-keys/:id/revoke` | JWT | Revoke key |
+| 6 | POST | `/api/v1/api-keys/:id/regenerate` | JWT | Regenerate key |
+| 7 | DELETE | `/api/v1/api-keys/:id` | JWT | Delete key |
+| 8 | GET | `/api/v1/ping` | API Key | Test endpoint |
+| 9 | POST | `/api/v1/ping` | API Key | Test endpoint |
+| 10 | GET | `/api/v1/ping` | API Key (Bearer) | Alt auth |
+| 11 | GET | `/api/v1/ping?apiKey=X` | Query | Alt auth |
+| 12 | GET | `/api/v1/ping/stats` | API Key | Usage stats |
+| 13 | GET | `/api/v1/ping` | None | Error test |
+| 14 | GET | `/api/v1/ping` | Invalid | Error test |
+| 15 | GET | `/api/v1/ping` (x70) | API Key | Rate limit test |
+
+---
+
+## ✅ Complete Testing Checklist
+
+- [ ] Register user (201)
+- [ ] Login user (200, token)
+- [ ] Create API key (201, key)
+- [ ] List API keys (200, array)
+- [ ] Test ping with key (200, pong)
+- [ ] Test ping headers (X-RateLimit-*)
+- [ ] Test bearer token auth (200)
+- [ ] Test query param auth (200)
+- [ ] Test missing key (401)
+- [ ] Test invalid key (401)
+- [ ] Test rate limiting (429)
+- [ ] View usage stats (200, stats)
+- [ ] Revoke key (200)
+- [ ] Regenerate key (201, new key)
+- [ ] Delete key (200)
+
+---
+
+## 🎉 All 15+ Routes Ready for Testing!
+
+Use HTTPie with the commands above to test every feature.
+Just copy, paste, and run! 🚀

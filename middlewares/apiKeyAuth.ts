@@ -38,14 +38,15 @@ export async function apiKeyAuthMiddleware(
       throw new AuthenticationError('API key is required (use x-api-key header or Authorization: Bearer <key>)');
     }
 
-    const userId = await validateApiKey(apiKey);
+    const result = await validateApiKey(apiKey);
 
-    if (!userId) {
+    if (!result) {
       throw new AuthenticationError('Invalid or revoked API key');
     }
 
-    // Attach userId to request for use in controllers
-    (req as any).userId = userId;
+    // Attach userId and apiKeyId to request for use in controllers
+    (req as any).userId = result.userId;
+    (req as any).apiKeyId = result.apiKeyId;
     (req as any).apiKey = apiKey;
 
     next();

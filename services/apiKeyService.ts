@@ -126,9 +126,9 @@ export async function listApiKeys(userId: string): Promise<ApiKeyListResponse[]>
 }
 
 /**
- * Validate API key and return userId if valid
+ * Validate API key and return userId and apiKeyId if valid
  */
-export async function validateApiKey(key: string): Promise<string | null> {
+export async function validateApiKey(key: string): Promise<{ userId: string; apiKeyId: string } | null> {
   const keyHash = hashApiKey(key);
 
   const apiKey = await prisma.apiKey.findUnique({
@@ -140,7 +140,10 @@ export async function validateApiKey(key: string): Promise<string | null> {
     return null;
   }
 
-  return apiKey.userId;
+  return {
+    userId: apiKey.userId,
+    apiKeyId: apiKey.id,
+  };
 }
 
 /**

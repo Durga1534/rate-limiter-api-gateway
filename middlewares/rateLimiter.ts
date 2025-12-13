@@ -1,10 +1,7 @@
-/**
- * In-memory rate limiting middleware
- * For production, use Redis or a dedicated service like rate-limit-redis
- */
-
 import express from 'express';
 import { RateLimitError } from '../utils/errors.ts';
+import { checkRateLimits, recordRequest } from '../services/rateLimitService.ts';
+import { asyncMiddleware } from './errorHandler.ts';
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
@@ -65,6 +62,40 @@ export function createRateLimiter(config: RateLimitConfig) {
     }
   };
 }
+
+/**
+ * API Key rate limiting middleware
+ * Uses per-API-key limits from rate plan
+ */
+export const apiKeyRateLimitMiddleware = asyncMiddleware(
+  async (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
+    const apiKeyId = (req as any).apiKeyId;
+    
+    if (!apiKeyId) {
+      return next();
+    }
+
+    // Check rate limits
+    const status = await checkRateLimits(apiKeyId);
+
+    // Set rate limit headers
+    res.set('X-RateLimit-Limit', status.limit.toString());
+    res.set('X-RateLimit-Remaining', status.remaining.toString());
+    res.set('X-RateLimit-Reset', status.resetTime.getTime().toString());
+
+    if (!status.isAllowed) {
+      res.set('Retry-After', (status.retryAfter || 60).toString());
+      throw new RateLimitError(
+        `Rate limit exceeded. Try again in ${status.retryAfter} seconds`
+      );
+    }
+
+    // Record the request
+    await recordRequest(apiKeyId);
+
+    next();
+  }
+);
 
 /**
  * Pre-configured rate limiters

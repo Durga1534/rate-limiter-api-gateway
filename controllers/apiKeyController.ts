@@ -3,7 +3,6 @@
  */
 
 import express from 'express';
-import z from 'zod';
 import {
   createApiKey,
   listApiKeys,
@@ -41,10 +40,6 @@ export const createApiKeyController = asyncHandler(
   }
 );
 
-/**
- * GET /api/v1/api-keys
- * List all API keys for the user
- */
 export const listApiKeysController = asyncHandler(
   async (req: express.Request, res: express.Response): Promise<void> => {
     const userId = getUserIdFromRequest(req);
