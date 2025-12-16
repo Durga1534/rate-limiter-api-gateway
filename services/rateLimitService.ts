@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '../prisma.ts';
+import redis from '../utils/redis.ts';
 
 export interface RateLimitConfig {
   requestsPerMinute?: number;
@@ -72,39 +73,46 @@ async function checkPeriodLimit(
       resetTime: new Date(),
     };
   }
-
   const bucket = getBucketTimestamp(period);
   const resetTime = getResetTime(period);
 
-  // Find or create usage record
-  let usage = await prisma.usage.findFirst({
-    where: {
-      apiKeyId,
-      peroid: period,
-      timestampBucket: bucket,
-    },
-  });
+  // Use Redis for counters
+  try {
+    const key = `usage:${apiKeyId}:${period}:${bucket.getTime()}`;
+    const countStr = await redis.get(key);
+    const count = countStr ? parseInt(countStr, 10) : 0;
 
-  if (!usage) {
-    usage = await prisma.usage.create({
-      data: {
+    const remaining = Math.max(0, limit - count);
+    const isAllowed = count < limit;
+
+    return {
+      isAllowed,
+      limit,
+      remaining,
+      resetTime,
+    };
+  } catch (err) {
+    // If Redis unavailable, fall back to DB to avoid hard failure
+    const bucket2 = bucket;
+    const usage = await prisma.usage.findFirst({
+      where: {
         apiKeyId,
         peroid: period,
-        timestampBucket: bucket,
-        requestCount: 0,
+        timestampBucket: bucket2,
       },
     });
+
+    const dbCount = usage ? usage.requestCount : 0;
+    const remaining = Math.max(0, limit - dbCount);
+    const isAllowed = dbCount < limit;
+
+    return {
+      isAllowed,
+      limit,
+      remaining,
+      resetTime,
+    };
   }
-
-  const remaining = Math.max(0, limit - usage.requestCount);
-  const isAllowed = usage.requestCount < limit;
-
-  return {
-    isAllowed,
-    limit,
-    remaining,
-    resetTime,
-  };
 }
 
 /**
@@ -115,19 +123,31 @@ async function incrementCounter(
   period: 'MINUTE' | 'HOUR' | 'DAY'
 ): Promise<void> {
   const bucket = getBucketTimestamp(period);
+  const resetTime = getResetTime(period);
 
-  await prisma.usage.updateMany({
-    where: {
-      apiKeyId,
-      peroid: period,
-      timestampBucket: bucket,
-    },
-    data: {
-      requestCount: {
-        increment: 1,
+  const key = `usage:${apiKeyId}:${period}:${bucket.getTime()}`;
+
+  try {
+    const ttl = Math.max(1, Math.ceil((resetTime.getTime() - Date.now()) / 1000));
+    const pipeline = redis.pipeline();
+    pipeline.incr(key);
+    pipeline.expire(key, ttl);
+    await pipeline.exec();
+  } catch (err) {
+    // Fallback to DB increment if Redis fails
+    await prisma.usage.updateMany({
+      where: {
+        apiKeyId,
+        peroid: period,
+        timestampBucket: bucket,
       },
-    },
-  });
+      data: {
+        requestCount: {
+          increment: 1,
+        },
+      },
+    });
+  }
 }
 
 /**

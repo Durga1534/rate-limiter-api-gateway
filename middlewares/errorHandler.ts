@@ -1,6 +1,7 @@
 import express from 'express';
 import { AppError, ErrorCode } from '../utils/errors.ts';
 import { createErrorResponse } from '../utils/response.ts';
+import * as Sentry from '@sentry/node';
 
 export function errorHandler(
   err: Error | AppError,
@@ -9,6 +10,15 @@ export function errorHandler(
   _next: express.NextFunction
 ): void {
   console.error('[Error]', err);
+
+  // Send to Sentry if initialized
+  try {
+    if (process.env.SENTRY_DSN && Sentry && typeof Sentry.captureException === 'function') {
+      Sentry.captureException(err);
+    }
+  } catch (e) {
+    // ignore
+  }
 
   if (err instanceof AppError) {
     const response = createErrorResponse(err.code, err.message, err.details);
