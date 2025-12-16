@@ -1,0 +1,135 @@
+2025-12-16T03:48:31.808Z error: Redis health check failed
+2025-12-16T03:49:01.811Z info: Redis health check: pong=PONG status=ready
+2025-12-16T03:49:31.815Z info: Redis health check: pong=PONG status=ready
+2025-12-16T03:50:01.817Z info: Redis health check: pong=PONG status=ready
+2025-12-16T03:50:31.846Z info: Redis health check: pong=PONG status=ready
+2025-12-16T03:51:01.847Z info: Redis health check: pong=PONG status=ready
+2025-12-16T03:51:31.851Z info: Redis health check: pong=PONG status=ready
+2025-12-16T03:52:01.858Z info: Redis health check: pong=PONG status=ready
+2025-12-16T03:52:31.865Z info: Redis health check: pong=PONG status=ready
+2025-12-16T06:53:01.839Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:27:08.932Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:27:40.466Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:28:08.582Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:28:38.688Z error: Redis health check failed
+2025-12-16T12:29:19.638Z error: Redis health check failed
+2025-12-16T12:29:49.638Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:30:19.640Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:30:49.644Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:30:50.539Z info: POST /api/v1/auth/login 200
+2025-12-16T12:31:14.328Z info: GET /api/v1/api-keys 401
+2025-12-16T12:31:19.644Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:31:24.069Z info: GET /api/v1/ping 200
+2025-12-16T12:31:49.646Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:31:56.252Z info: GET /api/v1/ping 200
+2025-12-16T12:31:56.716Z info: GET /api/v1/ping 200
+2025-12-16T12:31:56.899Z info: GET /api/v1/ping 200
+2025-12-16T12:31:57.074Z info: GET /api/v1/ping 200
+2025-12-16T12:31:57.270Z info: GET /api/v1/ping 200
+2025-12-16T12:31:57.444Z info: GET /api/v1/ping 200
+2025-12-16T12:31:57.614Z info: GET /api/v1/ping 200
+2025-12-16T12:31:57.801Z info: GET /api/v1/ping 200
+2025-12-16T12:31:57.969Z info: GET /api/v1/ping 200
+2025-12-16T12:31:58.144Z info: GET /api/v1/ping 429
+2025-12-16T12:31:58.360Z info: GET /api/v1/ping 429
+2025-12-16T12:31:59.392Z info: GET /api/v1/ping 429
+2025-12-16T12:32:17.886Z info: GET /api/v1/ping 200
+2025-12-16T12:32:18.838Z info: GET /api/v1/ping 200
+2025-12-16T12:32:19.656Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:32:49.662Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:33:19.666Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:33:49.668Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:34:19.676Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:34:53.834Z info: Environment validation passed
+2025-12-16T12:34:53.846Z info: Environment: production
+2025-12-16T12:34:53.847Z error: Redis health check failed
+2025-12-16T12:34:54.087Z info: Database connection successful
+2025-12-16T12:34:54.088Z info: Redis ready for rate limiting
+2025-12-16T12:34:54.092Z info: ✓ Server is running on http://localhost:5050
+2025-12-16T12:34:54.092Z info: ✓ Node environment: production
+2025-12-16T12:35:03.981Z info: Environment validation passed
+2025-12-16T12:35:03.986Z info: Environment: production
+2025-12-16T12:35:03.986Z error: Redis health check failed
+2025-12-16T12:35:04.150Z info: Database connection successful
+2025-12-16T12:35:04.151Z info: Redis ready for rate limiting
+2025-12-16T12:35:04.154Z info: ✓ Server is running on http://localhost:5050
+2025-12-16T12:35:04.155Z info: ✓ Node environment: production
+2025-12-16T12:35:19.199Z warn: ⚠ SENTRY_DSN not configured - error tracking disabled
+2025-12-16T12:35:19.210Z info: Environment validation passed
+2025-12-16T12:35:19.210Z info: Environment: production
+2025-12-16T12:35:19.211Z error: Redis health check failed
+2025-12-16T12:35:19.372Z info: Database connection successful
+2025-12-16T12:35:19.373Z info: Redis ready for rate limiting
+2025-12-16T12:35:19.376Z info: ✓ Server is running on http://localhost:5050
+2025-12-16T12:35:19.376Z info: ✓ Node environment: production
+2025-12-16T12:35:49.215Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:36:19.225Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:36:49.225Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:37:19.266Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:37:49.261Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:37:51.576Z info: Received SIGINT, gracefully shutting down...
+2025-12-16T12:38:03.833Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:39:25.441Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:39:25.455Z error: Redis health check failed
+2025-12-16T12:39:39.877Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:39:39.882Z error: Redis health check failed
+2025-12-16T12:40:27.267Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:40:27.296Z info: Environment validation passed
+2025-12-16T12:40:27.299Z info: Environment: production
+2025-12-16T12:40:27.302Z error: Redis health check failed
+2025-12-16T12:40:27.866Z info: Database connection successful
+2025-12-16T12:40:27.868Z info: Redis ready for rate limiting
+2025-12-16T12:40:27.876Z info: ✓ Server is running on http://localhost:5050
+2025-12-16T12:40:27.878Z info: ✓ Node environment: production
+2025-12-16T12:41:07.246Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:41:07.259Z info: Environment validation passed
+2025-12-16T12:41:07.260Z info: Environment: production
+2025-12-16T12:41:07.261Z error: Redis health check failed
+2025-12-16T12:41:07.457Z info: Database connection successful
+2025-12-16T12:41:07.458Z info: Redis ready for rate limiting
+2025-12-16T12:41:07.463Z info: ✓ Server is running on http://localhost:5050
+2025-12-16T12:41:07.463Z info: ✓ Node environment: production
+2025-12-16T12:41:22.486Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:41:22.497Z info: Environment validation passed
+2025-12-16T12:41:22.497Z info: Environment: production
+2025-12-16T12:41:22.498Z error: Redis health check failed
+2025-12-16T12:41:22.651Z info: Database connection successful
+2025-12-16T12:41:37.259Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:42:01.885Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:42:01.897Z info: Environment validation passed
+2025-12-16T12:42:01.898Z info: Environment: production
+2025-12-16T12:42:01.899Z error: Redis health check failed:
+2025-12-16T12:42:02.097Z info: Database connection successful
+2025-12-16T12:42:02.098Z info: Redis ready for rate limiting
+2025-12-16T12:42:02.100Z info: ✓ Server is running on http://localhost:5050
+2025-12-16T12:42:02.101Z info: ✓ Node environment: production
+2025-12-16T12:42:22.557Z info: ✓ Sentry initialized for error tracking
+2025-12-16T12:42:22.569Z info: Environment validation passed
+2025-12-16T12:42:22.569Z info: Environment: production
+2025-12-16T12:42:22.570Z error: Redis health check failed:
+2025-12-16T12:42:22.726Z info: Database connection successful
+2025-12-16T12:42:31.914Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:43:01.964Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:43:20.469Z info: GET /api/v1/ping 200
+2025-12-16T12:43:31.978Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:44:01.978Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:44:31.979Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:45:01.984Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:45:08.916Z warn: GET /api/v1/auth/register 401
+2025-12-16T12:45:18.829Z info: POST /api/v1/auth/register 201
+2025-12-16T12:45:27.928Z info: POST /api/v1/auth/login 200
+2025-12-16T12:45:31.987Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:46:01.986Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:46:31.991Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:47:02.005Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:47:31.998Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:48:01.998Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:48:32.011Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:49:02.022Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:49:32.014Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:50:02.023Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:50:32.027Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:51:02.038Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:51:32.050Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:52:02.058Z info: Redis health check: pong=PONG status=ready
+2025-12-16T12:52:32.059Z info: Redis health check: pong=PONG status=ready
