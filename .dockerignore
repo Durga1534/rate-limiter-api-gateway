@@ -1,0 +1,36 @@
+# Node modules (installed inside container)
+node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.*
+
+# Build artifacts
+dist
+build
+coverage
+
+# Git
+.git
+.gitignore
+
+# Docker files themselves
+docker-compose.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.vscode
+.idea
+
+# Prisma artifacts (optional safety)
+prisma/migrations
