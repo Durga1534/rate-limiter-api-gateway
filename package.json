@@ -30,7 +30,8 @@
     "swagger-ui-express": "^4.6.3",
     "uuid": "^13.0.0",
     "winston": "^3.19.0",
-    "zod": "^4.1.13"
+    "zod": "^4.1.13",
+    "bcrypt": "^6.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
