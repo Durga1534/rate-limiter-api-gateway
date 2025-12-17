@@ -23,7 +23,7 @@ export const registerController = asyncHandler(
         
         // Validate password strength
         const passwordStrength = validatePasswordStrength(validatedData.password);
-        console.log(`[Register] User: ${validatedData.email}, Password strength: ${passwordStrength.score}/4`);
+        // Logging of user email and password strength removed to prevent leaking sensitive info
 
         const user = await registerUser(
             validatedData.name,
