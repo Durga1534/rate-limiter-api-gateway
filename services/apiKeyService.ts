@@ -3,6 +3,7 @@
  */
 
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import { prisma } from '../prisma.ts';
 import { NotFoundError } from '../utils/errors.ts';
 
@@ -32,10 +33,11 @@ export function generateApiKey(): string {
 }
 
 /**
- * Hash API key using SHA256
+ * Hash API key using bcrypt (with 12 salt rounds)
  */
 export function hashApiKey(key: string): string {
-  return crypto.createHash('sha256').update(key).digest('hex');
+  // Synchronously hash key with bcrypt
+  return bcrypt.hashSync(key, 12);
 }
 
 /**
@@ -129,21 +131,21 @@ export async function listApiKeys(userId: string): Promise<ApiKeyListResponse[]>
  * Validate API key and return userId and apiKeyId if valid
  */
 export async function validateApiKey(key: string): Promise<{ userId: string; apiKeyId: string } | null> {
-  const keyHash = hashApiKey(key);
-
-  const apiKey = await prisma.apiKey.findUnique({
-    where: { keyHash },
+  // Look up all active API keys, compare each with bcrypt
+  const apiKeys = await prisma.apiKey.findMany({
+    where: { status: 'ACTIVE' },
     include: { user: true },
   });
 
-  if (!apiKey || apiKey.status !== 'ACTIVE') {
-    return null;
+  for (const apiKey of apiKeys) {
+    if (await bcrypt.compare(key, apiKey.keyHash)) {
+      return {
+        userId: apiKey.userId,
+        apiKeyId: apiKey.id,
+      };
+    }
   }
-
-  return {
-    userId: apiKey.userId,
-    apiKeyId: apiKey.id,
-  };
+  return null;
 }
 
 /**
