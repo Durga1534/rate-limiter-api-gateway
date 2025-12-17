@@ -5,12 +5,12 @@ import { asyncMiddleware } from './errorHandler.ts';
 import redis from '../utils/redis.ts';
 
 interface RateLimitConfig {
-  windowMs: number; // Time window in milliseconds
-  maxRequests: number; // Max requests per window
+  windowMs: number; 
+  maxRequests: number; 
   message?: string;
-  weight?: number; // Optional: multiplier for request cost (default 1)
-  identifierType?: 'ip' | 'apiKey' | 'custom'; // How to identify the client
-  identifierFn?: (req: express.Request) => string; // Custom identifier extractor
+  weight?: number; 
+  identifierType?: 'ip' | 'apiKey' | 'custom';
+  identifierFn?: (req: express.Request) => string;
 }
 
 /**
@@ -41,10 +41,13 @@ export function createRateLimiter(config: RateLimitConfig) {
 
   return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     try {
-      let identifier: string;
+     let identifier: string;
 
       if (identifierType === 'apiKey') {
         identifier = (req as any).apiKeyId || 'unknown';
+        if(identifier === 'unknown') {
+          throw new RateLimitError('API key missing for rate limiting');
+        }  
       } else if (identifierType === 'custom' && config.identifierFn) {
         identifier = config.identifierFn(req);
       } else {
@@ -57,16 +60,12 @@ export function createRateLimiter(config: RateLimitConfig) {
       const bucketStart = Math.floor(now / windowMs) * windowMs;
       const key = `rl:${identifier}:${bucketStart}`;
 
-      // Atomically increment the counter by weight. If the returned value <= weight, set TTL.
-      const count = await redis.incrby(key, weight);
-      if (count === weight) {
-        const ttlSecs = Math.max(1, Math.ceil((bucketStart + windowMs - now) / 1000));
-        try {
-          await redis.expire(key, ttlSecs);
-        } catch (e) {
-          // ignore expire errors
-        }
-      }
+      const ttlSeconds = Math.ceil((windowMs - (now - bucketStart)) / 1000);
+      const pipeline = redis.pipeline();
+      pipeline.incrby(key, weight);
+      pipeline.expire(key, ttlSeconds, 'GT');
+      const results = await pipeline.exec();
+      const count = results ? results[0][1] as number : 0;
 
       const remaining = Math.max(0, config.maxRequests - count);
       const reset = bucketStart + windowMs;

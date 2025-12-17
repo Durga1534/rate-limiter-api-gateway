@@ -56,6 +56,12 @@ if (process.env.SENTRY_DSN) {
 
 app.use(express.json());
 
+// Swagger UI (OpenAPI)
+mountSwagger(app);
+
+// Request logging
+app.use(requestLogger);
+
 // Capture request ID in Sentry context (handlers optional if not available)
 if (sentryInitialized) {
 	app.use((req: any, _res, next) => {
@@ -66,12 +72,6 @@ if (sentryInitialized) {
 		next();
 	});
 }
-
-// Swagger UI (OpenAPI)
-mountSwagger(app);
-
-// Request logging
-app.use(requestLogger);
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/api-keys", apiKeyRoutes);
