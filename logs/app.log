@@ -684,3 +684,8 @@
 2025-12-17T10:57:44.291Z info: Redis health check: pong=PONG status=ready
 2025-12-17T10:58:14.218Z info: Redis health check: pong=PONG status=ready
 2025-12-17T10:58:44.220Z info: Redis health check: pong=PONG status=ready
+2025-12-18T12:00:37.461Z info: ✓ Sentry initialized for error tracking
+2025-12-18T12:00:37.472Z info: Environment validation passed
+2025-12-18T12:00:37.472Z info: Environment: production
+2025-12-18T12:00:37.473Z error: Redis health check failed:
+2025-12-18T12:00:40.306Z error: Database connection failed:

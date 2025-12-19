@@ -80,11 +80,8 @@ app.use("/api/v1", protectedRoutes);
 // Health check (redis, uptime)
 app.use('/health', healthRoutes);
 
-// Optional: lightweight cache for GET endpoints (mounted AFTER protected routes so rate-limiter runs first)
 app.use(cacheResponse({ ttl: 60 }));
 
-// Error handling middleware (must be last)
-// Sentry will automatically capture errors from our errorHandler
 app.use(errorHandler);
 
 export default app;
