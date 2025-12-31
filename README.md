@@ -86,6 +86,28 @@ This project showcases real-world backend engineering skills with a focus on **s
 
 ---
 
+## Why This Project Exists
+
+This project was built to simulate real-world API infrastructure used in production systems.
+It focuses on solving common backend challenges such as rate limiting, authentication,
+observability, and secure API access at scale.
+
+The goal was to design something that could realistically sit in front of
+microservices or public APIs in a production environment.
+
+---
+
+## What I Learned
+
+- Designing stateless APIs for horizontal scalability
+- Implementing secure authentication and authorization flows
+- Handling rate limiting in distributed systems
+- Structuring backend code for maintainability and growth
+- Writing production-grade logging and error handling
+
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
