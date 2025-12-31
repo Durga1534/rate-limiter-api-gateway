@@ -86,7 +86,7 @@ This project showcases real-world backend engineering skills with a focus on **s
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Local Development Setup
 
 ### Prerequisites
 - Docker and Docker Compose installed
