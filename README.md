@@ -261,8 +261,8 @@ Contributions, issues, and feature requests are welcome!
 
 **Konduru Durga Prasad**  
 Email: kondurudurgaprasad.2@gmail.com  
-LinkedIn: [linkedin.com/in/yourprofile](https://www.linkedin.com/in/durgaprasad23/)  
-GitHub: [@yourusername](https://github.com/Durga1534)
+LinkedIn: [linkedin.com/in/durgaprasad23](https://www.linkedin.com/in/durgaprasad23/)  
+GitHub: [@Durga1534](https://github.com/Durga1534)
 
 ---
 
