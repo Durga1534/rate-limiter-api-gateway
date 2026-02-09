@@ -1,5 +1,7 @@
 import express from "express";
 import * as Sentry from '@sentry/node';
+import helmet from 'helmet';
+import cors from 'cors';
 import authRoutes from "./routes/auth.routes.ts";
 import apiKeyRoutes from "./routes/apiKey.routes.ts";
 import protectedRoutes from "./routes/protected.routes.ts";
@@ -54,6 +56,11 @@ if (process.env.SENTRY_DSN) {
 		setInterval(checkRedis, redisHealthInterval * 1000);
 	}
 
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:3000'],
+  credentials: true,
+}));
 app.use(express.json());
 
 // Swagger UI (OpenAPI)

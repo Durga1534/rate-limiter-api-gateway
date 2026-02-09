@@ -6,11 +6,16 @@ import { prisma } from './prisma.ts';
 
 // Validate required environment variables
 function validateEnvironment() {
-  const required = ['DATABASE_URL'];
+  const required = ['DATABASE_URL', 'JWT_SECRET'];
   
   const missing = required.filter(key => !process.env[key]);
   if (missing.length > 0) {
     logger.error(`Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+  
+  if (process.env.NODE_ENV === 'production' && process.env.JWT_SECRET!.length < 32) {
+    logger.error('JWT_SECRET must be at least 32 characters in production');
     process.exit(1);
   }
   
