@@ -86,11 +86,45 @@ This project showcases real-world backend engineering skills with a focus on **s
 
 ---
 
-## 🚀 Local Development Setup
+## �️ Quick Start
 
-### Prerequisites
-- Docker and Docker Compose installed
-- Git
+### Using Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd rate-limiting-api
+
+# Start all services
+docker-compose up --build
+
+# The API will be available at http://localhost:5050
+```
+
+### Manual Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Set up database
+npx prisma migrate dev
+npx prisma generate
+
+# Start Redis (required for rate limiting)
+redis-server
+
+# Start development server
+npm run dev
+```
+
+---
+
+## 🚀 Local Development Setup
 
 ### Installation
 

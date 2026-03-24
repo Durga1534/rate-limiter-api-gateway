@@ -1,7 +1,7 @@
 {
   "name": "rate-limiting-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Production-ready rate limiting API gateway with JWT authentication, Redis-backed rate limiting, and enterprise-grade features",
   "main": "index.js",
   "scripts": {
     "start": "tsx server.ts",
@@ -23,7 +23,7 @@
     "docker:run": "docker-compose up --build",
     "docker:down": "docker-compose down"
   },
-  "keywords": [],
+  "keywords": ["rate-limiting", "api-gateway", "redis", "typescript", "express", "jwt", "authentication"],
   "author": "",
   "license": "ISC",
   "type": "module",
