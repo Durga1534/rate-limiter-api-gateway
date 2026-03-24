@@ -154,46 +154,46 @@ The API will be available at `http://localhost:5050`
 
 ---
 
-## 📡 API Usage
+## � Documentation
 
-### User Registration
+- **[API Routes Documentation](./API_ROUTES.md)** - Complete API endpoint reference
+- **[Rate Limiting Examples](./RATE_LIMITER_EXAMPLES.md)** - Rate limiting configuration and usage
+- **[Docker Setup Guide](./README.Docker.md)** - Docker deployment instructions
+- **[Environment Configuration](./.env.example)** - Environment variables setup
+
+---
+
+## 📡 API Quick Start
+
+### 1. Register a User
 ```bash
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securePassword123"
-}
+curl -X POST http://localhost:5050/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","email":"john@example.com","password":"Password123!"}'
 ```
 
-### User Login
+### 2. Login to Get JWT Token
 ```bash
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securePassword123"
-}
+curl -X POST http://localhost:5050/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"john@example.com","password":"Password123!"}'
 ```
 
-### Access Protected Routes (JWT)
+### 3. Create API Key
 ```bash
-GET /api/protected/resource
-Authorization: Bearer <YOUR_JWT_TOKEN>
+curl -X POST http://localhost:5050/api/v1/api-keys \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"My API Key","planId":"basic"}'
 ```
 
-### Access API Endpoints (API Key)
+### 4. Use API Key for Requests
 ```bash
-GET /api/data
-x-api-key: <YOUR_API_KEY>
+curl -X GET http://localhost:5050/api/v1/api/ping \
+  -H "X-API-Key: sk_live_YOUR_API_KEY"
 ```
 
-### Health Check
-```bash
-GET /health
-```
+📖 **For complete API documentation, see [API_ROUTES.md](./API_ROUTES.md)**
 
 ---
 
