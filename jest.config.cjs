@@ -15,7 +15,13 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^@prisma/client$': '<rootDir>/tests/mocks/prismaMock.ts',
+    '^prisma\\.ts$': '<rootDir>/tests/mocks/prismaMock.ts',
     '^uuid$': '<rootDir>/tests/mocks/uuidMock.ts',
+    '^redis\\.ts$': '<rootDir>/tests/mocks/redisMock.ts',
+    '^logger\\.ts$': '<rootDir>/tests/mocks/loggerMock.ts',
+    '^swagger-ui-express$': '<rootDir>/tests/mocks/swaggerMock.ts',
+    '^@sentry/node$': '<rootDir>/tests/mocks/sentryMock.ts'
   },
   collectCoverageFrom: [
     '**/*.ts',

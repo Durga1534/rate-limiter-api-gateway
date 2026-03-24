@@ -1083,3 +1083,229 @@
 2025-12-18T04:29:18.315Z info: Environment: production
 2025-12-18T04:29:18.316Z error: Redis health check failed:
 2025-12-18T04:29:21.179Z error: Database connection failed:
+2026-03-24T12:52:36.698Z info: ✓ Sentry initialized for error tracking
+2026-03-24T12:52:36.714Z info: Environment validation passed
+2026-03-24T12:52:36.714Z info: Environment: production
+2026-03-24T12:52:36.715Z error: Redis health check failed:
+2026-03-24T12:52:38.781Z info: Database connection successful
+2026-03-24T12:52:38.782Z warn: Waiting for Redis... attempt 1/10
+2026-03-24T12:52:39.295Z warn: Waiting for Redis... attempt 2/10
+2026-03-24T12:52:39.797Z warn: Waiting for Redis... attempt 3/10
+2026-03-24T12:52:40.308Z warn: Waiting for Redis... attempt 4/10
+2026-03-24T12:52:40.822Z warn: Waiting for Redis... attempt 5/10
+2026-03-24T12:52:41.335Z warn: Waiting for Redis... attempt 6/10
+2026-03-24T12:52:41.848Z warn: Waiting for Redis... attempt 7/10
+2026-03-24T12:52:42.351Z warn: Waiting for Redis... attempt 8/10
+2026-03-24T12:52:42.853Z warn: Waiting for Redis... attempt 9/10
+2026-03-24T12:52:43.365Z warn: Waiting for Redis... attempt 10/10
+2026-03-24T12:52:43.878Z warn: Redis not ready, continuing with fallback
+2026-03-24T12:52:43.896Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T12:52:43.896Z info: ✓ Node environment: production
+2026-03-24T12:53:06.706Z error: Redis health check failed:
+2026-03-24T12:53:28.408Z info: Received SIGINT, gracefully shutting down...
+2026-03-24T12:56:26.891Z info: ✓ Sentry initialized for error tracking
+2026-03-24T12:56:26.903Z info: Environment validation passed
+2026-03-24T12:56:26.903Z info: Environment: production
+2026-03-24T12:56:26.904Z error: Redis health check failed:
+2026-03-24T12:56:28.864Z info: Database connection successful
+2026-03-24T12:56:28.864Z warn: Waiting for Redis... attempt 1/10
+2026-03-24T12:56:29.366Z warn: Waiting for Redis... attempt 2/10
+2026-03-24T12:56:29.867Z warn: Waiting for Redis... attempt 3/10
+2026-03-24T12:56:30.381Z warn: Waiting for Redis... attempt 4/10
+2026-03-24T12:56:30.896Z warn: Waiting for Redis... attempt 5/10
+2026-03-24T12:56:31.412Z warn: Waiting for Redis... attempt 6/10
+2026-03-24T12:56:31.927Z warn: Waiting for Redis... attempt 7/10
+2026-03-24T12:56:32.439Z warn: Waiting for Redis... attempt 8/10
+2026-03-24T12:56:32.954Z warn: Waiting for Redis... attempt 9/10
+2026-03-24T12:56:33.468Z warn: Waiting for Redis... attempt 10/10
+2026-03-24T12:56:33.968Z warn: Redis not ready, continuing with fallback
+2026-03-24T12:56:33.974Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T12:56:33.974Z info: ✓ Node environment: production
+2026-03-24T12:56:56.900Z error: Redis health check failed:
+2026-03-24T12:57:15.748Z info: Received SIGINT, gracefully shutting down...
+2026-03-24T12:58:30.870Z info: ✓ Sentry initialized for error tracking
+2026-03-24T12:58:30.883Z info: Environment validation passed
+2026-03-24T12:58:30.884Z info: Environment: production
+2026-03-24T12:58:30.885Z error: Redis health check failed:
+2026-03-24T12:58:33.166Z info: Database connection successful
+2026-03-24T12:58:33.168Z warn: Waiting for Redis... attempt 1/10
+2026-03-24T12:58:33.670Z warn: Waiting for Redis... attempt 2/10
+2026-03-24T12:58:34.184Z warn: Waiting for Redis... attempt 3/10
+2026-03-24T12:58:34.685Z warn: Waiting for Redis... attempt 4/10
+2026-03-24T12:58:35.200Z warn: Waiting for Redis... attempt 5/10
+2026-03-24T12:58:35.715Z warn: Waiting for Redis... attempt 6/10
+2026-03-24T12:58:36.230Z warn: Waiting for Redis... attempt 7/10
+2026-03-24T12:58:36.744Z warn: Waiting for Redis... attempt 8/10
+2026-03-24T12:58:37.246Z warn: Waiting for Redis... attempt 9/10
+2026-03-24T12:58:37.761Z warn: Waiting for Redis... attempt 10/10
+2026-03-24T12:58:38.277Z warn: Redis not ready, continuing with fallback
+2026-03-24T12:58:38.282Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T12:58:38.283Z info: ✓ Node environment: production
+2026-03-24T12:59:00.881Z error: Redis health check failed:
+2026-03-24T12:59:30.890Z error: Redis health check failed:
+2026-03-24T13:00:00.905Z error: Redis health check failed:
+2026-03-24T13:00:31.685Z error: Redis health check failed:
+2026-03-24T13:00:33.491Z error: POST /api/v1/auth 500
+2026-03-24T13:01:01.699Z error: Redis health check failed:
+2026-03-24T13:01:31.702Z error: Redis health check failed:
+2026-03-24T13:02:01.717Z error: Redis health check failed:
+2026-03-24T13:02:31.723Z error: Redis health check failed:
+2026-03-24T13:03:01.730Z error: Redis health check failed:
+2026-03-24T13:03:06.010Z warn: POST /api/v1/auth 401
+2026-03-24T13:03:13.911Z warn: POST /api/v1/auth 401
+2026-03-24T13:03:31.044Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:03:31.059Z info: Environment validation passed
+2026-03-24T13:03:31.059Z info: Environment: production
+2026-03-24T13:03:31.060Z error: Redis health check failed:
+2026-03-24T13:03:33.722Z info: Database connection successful
+2026-03-24T13:03:33.723Z warn: Waiting for Redis... attempt 1/10
+2026-03-24T13:03:34.232Z warn: Waiting for Redis... attempt 2/10
+2026-03-24T13:03:34.734Z warn: Waiting for Redis... attempt 3/10
+2026-03-24T13:03:35.248Z warn: Waiting for Redis... attempt 4/10
+2026-03-24T13:03:35.751Z warn: Waiting for Redis... attempt 5/10
+2026-03-24T13:03:36.264Z warn: Waiting for Redis... attempt 6/10
+2026-03-24T13:03:36.780Z warn: Waiting for Redis... attempt 7/10
+2026-03-24T13:03:37.295Z warn: Waiting for Redis... attempt 8/10
+2026-03-24T13:03:37.808Z warn: Waiting for Redis... attempt 9/10
+2026-03-24T13:03:38.309Z warn: Waiting for Redis... attempt 10/10
+2026-03-24T13:03:38.812Z warn: Redis not ready, continuing with fallback
+2026-03-24T13:03:38.825Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T13:03:38.825Z info: ✓ Node environment: production
+2026-03-24T13:03:58.028Z warn: POST /api/v1/auth 401
+2026-03-24T13:04:01.061Z error: Redis health check failed:
+2026-03-24T13:04:15.085Z info: POST /api/v1/auth/register 201
+2026-03-24T13:04:31.069Z error: Redis health check failed:
+2026-03-24T13:04:33.050Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:04:33.070Z info: Environment validation passed
+2026-03-24T13:04:33.070Z info: Environment: production
+2026-03-24T13:04:33.072Z error: Redis health check failed:
+2026-03-24T13:04:35.018Z info: Database connection successful
+2026-03-24T13:04:35.019Z warn: Waiting for Redis... attempt 1/10
+2026-03-24T13:04:35.526Z warn: Waiting for Redis... attempt 2/10
+2026-03-24T13:04:36.050Z warn: Waiting for Redis... attempt 3/10
+2026-03-24T13:04:36.564Z warn: Waiting for Redis... attempt 4/10
+2026-03-24T13:04:37.080Z warn: Waiting for Redis... attempt 5/10
+2026-03-24T13:04:37.592Z warn: Waiting for Redis... attempt 6/10
+2026-03-24T13:04:38.105Z warn: Waiting for Redis... attempt 7/10
+2026-03-24T13:04:38.621Z warn: Waiting for Redis... attempt 8/10
+2026-03-24T13:04:39.136Z warn: Waiting for Redis... attempt 9/10
+2026-03-24T13:04:39.651Z warn: Waiting for Redis... attempt 10/10
+2026-03-24T13:04:40.167Z warn: Redis not ready, continuing with fallback
+2026-03-24T13:05:01.080Z error: Redis health check failed:
+2026-03-24T13:05:09.625Z info: POST /api/v1/auth/login 200
+2026-03-24T13:05:30.717Z info: POST /api/v1/auth/login 200
+2026-03-24T13:05:31.087Z error: Redis health check failed:
+2026-03-24T13:05:42.261Z info: GET /health 200
+2026-03-24T13:06:01.101Z error: Redis health check failed:
+2026-03-24T13:06:31.112Z error: Redis health check failed:
+2026-03-24T13:07:01.114Z error: Redis health check failed:
+2026-03-24T13:07:24.131Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:07:24.168Z info: Environment validation passed
+2026-03-24T13:07:24.168Z info: Environment: production
+2026-03-24T13:07:24.170Z error: Redis health check failed:
+2026-03-24T13:07:31.710Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:07:31.725Z info: Environment validation passed
+2026-03-24T13:07:31.726Z info: Environment: production
+2026-03-24T13:07:31.727Z error: Redis health check failed:
+2026-03-24T13:07:33.716Z info: Database connection successful
+2026-03-24T13:07:33.717Z warn: Waiting for Redis... attempt 1/10
+2026-03-24T13:07:34.229Z warn: Waiting for Redis... attempt 2/10
+2026-03-24T13:07:34.743Z warn: Waiting for Redis... attempt 3/10
+2026-03-24T13:07:35.244Z warn: Waiting for Redis... attempt 4/10
+2026-03-24T13:07:35.758Z warn: Waiting for Redis... attempt 5/10
+2026-03-24T13:07:36.273Z warn: Waiting for Redis... attempt 6/10
+2026-03-24T13:07:36.790Z warn: Waiting for Redis... attempt 7/10
+2026-03-24T13:07:37.304Z warn: Waiting for Redis... attempt 8/10
+2026-03-24T13:07:37.820Z warn: Waiting for Redis... attempt 9/10
+2026-03-24T13:07:38.333Z warn: Waiting for Redis... attempt 10/10
+2026-03-24T13:07:38.834Z warn: Redis not ready, continuing with fallback
+2026-03-24T13:07:38.840Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T13:07:38.841Z info: ✓ Node environment: production
+2026-03-24T13:10:31.807Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:10:31.918Z info: Environment validation passed
+2026-03-24T13:10:31.919Z info: Environment: production
+2026-03-24T13:10:32.179Z info: Redis health check: pong=true status=ready
+2026-03-24T13:10:33.870Z info: Database connection successful
+2026-03-24T13:10:33.871Z info: Redis ready for rate limiting
+2026-03-24T13:10:33.878Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T13:10:33.879Z info: ✓ Node environment: production
+2026-03-24T13:10:39.900Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:10:39.983Z info: Environment validation passed
+2026-03-24T13:10:39.984Z info: Environment: production
+2026-03-24T13:10:40.215Z info: Redis health check: pong=true status=ready
+2026-03-24T13:10:41.810Z info: Database connection successful
+2026-03-24T13:10:49.545Z info: GET /health 200
+2026-03-24T13:11:02.097Z info: Redis health check: pong=true status=ready
+2026-03-24T13:11:32.091Z info: Redis health check: pong=true status=ready
+2026-03-24T13:11:58.026Z error: POST /api/v1/auth/login 500
+2026-03-24T13:12:02.109Z info: Redis health check: pong=true status=ready
+2026-03-24T13:12:08.039Z info: Received SIGINT, gracefully shutting down...
+2026-03-24T13:12:18.725Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:12:18.794Z info: Environment validation passed
+2026-03-24T13:12:18.795Z info: Environment: production
+2026-03-24T13:12:19.001Z info: Redis health check: pong=true status=ready
+2026-03-24T13:12:20.603Z info: Database connection successful
+2026-03-24T13:12:20.605Z info: Redis ready for rate limiting
+2026-03-24T13:12:20.609Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T13:12:20.609Z info: ✓ Node environment: production
+2026-03-24T13:12:29.387Z error: POST /api/v1/auth/login 500
+2026-03-24T13:12:48.965Z info: Redis health check: pong=true status=ready
+2026-03-24T13:13:04.276Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:13:04.334Z info: Environment validation passed
+2026-03-24T13:13:04.335Z info: Environment: production
+2026-03-24T13:13:04.541Z info: Redis health check: pong=true status=ready
+2026-03-24T13:13:06.183Z info: Database connection successful
+2026-03-24T13:13:18.977Z info: Redis health check: pong=true status=ready
+2026-03-24T13:13:23.840Z error: POST /api/v1/auth/login 500
+2026-03-24T13:13:48.994Z info: Redis health check: pong=true status=ready
+2026-03-24T13:14:11.429Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:14:11.491Z info: Environment validation passed
+2026-03-24T13:14:11.492Z info: Environment: production
+2026-03-24T13:14:11.701Z info: Redis health check: pong=true status=ready
+2026-03-24T13:14:13.370Z info: Database connection successful
+2026-03-24T13:14:14.450Z error: POST /api/v1/auth/login 500
+2026-03-24T13:14:18.995Z info: Redis health check: pong=true status=ready
+2026-03-24T13:14:49.007Z info: Redis health check: pong=true status=ready
+2026-03-24T13:14:59.557Z error: POST /api/v1/auth/login 500
+2026-03-24T13:15:19.032Z info: Redis health check: pong=true status=ready
+2026-03-24T13:15:26.840Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:15:26.914Z info: Environment validation passed
+2026-03-24T13:15:26.915Z info: Environment: production
+2026-03-24T13:15:27.163Z info: Redis health check: pong=true status=ready
+2026-03-24T13:15:28.636Z error: POST /api/v1/auth/login 500
+2026-03-24T13:15:28.986Z info: Database connection successful
+2026-03-24T13:15:45.457Z error: POST /api/v1/auth/login 500
+2026-03-24T13:15:49.075Z info: Redis health check: pong=true status=ready
+2026-03-24T13:15:58.678Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:15:58.737Z info: Environment validation passed
+2026-03-24T13:15:58.738Z info: Environment: production
+2026-03-24T13:15:58.940Z info: Redis health check: pong=true status=ready
+2026-03-24T13:16:00.562Z info: Database connection successful
+2026-03-24T13:16:04.144Z error: POST /api/v1/auth/login 500
+2026-03-24T13:16:18.725Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:16:18.785Z info: Environment validation passed
+2026-03-24T13:16:18.785Z info: Environment: production
+2026-03-24T13:16:18.985Z info: Redis health check: pong=true status=ready
+2026-03-24T13:16:19.037Z info: Redis health check: pong=true status=ready
+2026-03-24T13:16:20.637Z info: Database connection successful
+2026-03-24T13:16:45.928Z error: POST /api/v1/auth/login 500
+2026-03-24T13:16:49.049Z info: Redis health check: pong=true status=ready
+2026-03-24T13:16:50.012Z error: POST /api/v1/auth/register 500
+2026-03-24T13:17:19.045Z info: Redis health check: pong=true status=ready
+2026-03-24T13:17:49.064Z info: Redis health check: pong=true status=ready
+2026-03-24T13:18:19.079Z info: Redis health check: pong=true status=ready
+2026-03-24T13:18:30.690Z error: POST /api/v1/auth/login 500
+2026-03-24T13:18:36.950Z info: Received SIGINT, gracefully shutting down...
+2026-03-24T13:18:40.006Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:18:40.124Z info: Environment validation passed
+2026-03-24T13:18:40.125Z info: Environment: production
+2026-03-24T13:18:40.490Z info: Redis health check: pong=true status=ready
+2026-03-24T13:18:42.131Z info: Database connection successful
+2026-03-24T13:18:42.133Z info: Redis ready for rate limiting
+2026-03-24T13:18:42.139Z info: ✓ Server is running on http://localhost:5050
+2026-03-24T13:18:42.140Z info: ✓ Node environment: production
+2026-03-24T13:18:48.810Z info: ✓ Sentry initialized for error tracking
+2026-03-24T13:18:48.891Z info: Environment validation passed
+2026-03-24T13:18:48.892Z info: Environment: production
+2026-03-24T13:18:49.091Z info: Redis health check: pong=true status=ready
+2026-03-24T13:18:50.722Z info: Database connection successful

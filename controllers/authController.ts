@@ -22,7 +22,7 @@ export const registerController = asyncHandler(
         const validatedData = registerSchema.parse(req.body);
         
         // Validate password strength
-        const passwordStrength = validatePasswordStrength(validatedData.password);
+        validatePasswordStrength(validatedData.password);
         // Logging of user email and password strength removed to prevent leaking sensitive info
 
         const user = await registerUser(

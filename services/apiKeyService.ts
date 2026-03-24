@@ -3,7 +3,7 @@
  */
 
 import crypto from 'crypto';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma.ts';
 import { NotFoundError } from '../utils/errors.ts';
 

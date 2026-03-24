@@ -9,8 +9,9 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   
-  // Redis
-  REDIS_URL: z.string().min(1, 'REDIS_URL is required').default('redis://127.0.0.1:6379'),
+  // Redis (QStash REST API)
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   REDIS_HEALTH_CHECK_INTERVAL: z.string().transform(Number).pipe(z.number()).default(() => 30),
   
   // JWT
@@ -68,7 +69,8 @@ export const databaseConfig = {
 };
 
 export const redisConfig = {
-  url: env.REDIS_URL,
+  restUrl: env.UPSTASH_REDIS_REST_URL,
+  restToken: env.UPSTASH_REDIS_REST_TOKEN,
   healthCheckInterval: env.REDIS_HEALTH_CHECK_INTERVAL * 1000,
 };
 
