@@ -6,10 +6,12 @@ import { createSuccessResponse } from "../utils/response.ts";
 import { validatePasswordStrength } from "../utils/passwordValidator.ts";
 
 // Validation schemas
+
 const registerSchema = z.object({
     name: z.string().min(1).max(255).optional(),
     email: z.string().email('Invalid email format'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
+
 });
 
 const loginSchema = z.object({
@@ -19,12 +21,12 @@ const loginSchema = z.object({
 
 export const registerController = asyncHandler(
     async (req: express.Request, res: express.Response): Promise<void> => {
-        const validatedData = registerSchema.parse(req.body);
-        
-        // Validate password strength
-        validatePasswordStrength(validatedData.password);
-        // Logging of user email and password strength removed to prevent leaking sensitive info
 
+        const validatedData = registerSchema.parse(req.body);
+        // Validate password strength
+        const passwordStrength = validatePasswordStrength(validatedData.password);
+
+        // Logging of user email and password strength removed to prevent leaking sensitive info
         const user = await registerUser(
             validatedData.name,
             validatedData.email,
@@ -39,10 +41,10 @@ export const registerController = asyncHandler(
 
 export const loginController = asyncHandler(
     async (req: express.Request, res: express.Response): Promise<void> => {
-        const validatedData = loginSchema.parse(req.body);
-        
-        const response = await loginUser(validatedData.email, validatedData.password);
 
+        const validatedData = loginSchema.parse(req.body);
+
+        const response = await loginUser(validatedData.email, validatedData.password);
         res.status(200).json(
             createSuccessResponse(response, 'Login successful')
         );

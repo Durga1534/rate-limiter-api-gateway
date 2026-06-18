@@ -57,17 +57,35 @@ export function createRateLimiter(config: RateLimitConfig) {
 
       const now = Date.now();
       const windowMs = config.windowMs;
+
+      // Sliding window using two adjacent buckets with time-weighting.
+      // current bucket covers [bucketStart, bucketStart + windowMs)
       const bucketStart = Math.floor(now / windowMs) * windowMs;
-      const key = `rl:${identifier}:${bucketStart}`;
+      const prevBucketStart = bucketStart - windowMs;
 
-      const ttlSeconds = Math.ceil((windowMs - (now - bucketStart)) / 1000);
+      const keyCurr = `rl:${identifier}:${bucketStart}`;
+      const keyPrev = `rl:${identifier}:${prevBucketStart}`;
+
+      const elapsedInCurr = now - bucketStart; // [0..windowMs)
+      const fractionCurr = elapsedInCurr / windowMs; // 0..1
+      const fractionPrev = 1 - fractionCurr;
+
+      // Weighted estimate of how many requests have been made in the last window.
+      // Note: we evaluate before writing to avoid fixed-window behavior.
       const pipeline = redis.pipeline();
-      pipeline.incrby(key, weight);
-      pipeline.expire(key, ttlSeconds, 'GT');
+      pipeline.get(keyCurr);
+      pipeline.get(keyPrev);
       const results = await pipeline.exec();
-      const count = results ? results[0][1] as number : 0;
 
-      const remaining = Math.max(0, config.maxRequests - count);
+      // ioredis returns: Array<[Error|null, result]> | null
+      const countCurrRaw = (results && results[0] && results[0][0] == null ? results[0][1] : null) as unknown;
+      const countPrevRaw = (results && results[1] && results[1][0] == null ? results[1][1] : null) as unknown;
+
+      const countCurr = countCurrRaw != null ? (parseInt(countCurrRaw as any, 10) || 0) : 0;
+      const countPrev = countPrevRaw != null ? (parseInt(countPrevRaw as any, 10) || 0) : 0;
+
+      const estimated = countCurr + countPrev * fractionPrev;
+      const remaining = Math.max(0, Math.ceil(config.maxRequests - (estimated + weight)));
       const reset = bucketStart + windowMs;
 
       res.set('X-RateLimit-Limit', config.maxRequests.toString());
@@ -75,11 +93,27 @@ export function createRateLimiter(config: RateLimitConfig) {
       res.set('X-RateLimit-Reset', reset.toString());
       res.set('X-RateLimit-Weight', weight.toString());
 
-      if (count > config.maxRequests) {
+      const limitAfterThisRequest = estimated + weight;
+      if (limitAfterThisRequest > config.maxRequests) {
         const retryAfter = Math.ceil((reset - now) / 1000);
         res.set('Retry-After', retryAfter.toString());
-        throw new RateLimitError(config.message || `Too many requests. Please try again in ${retryAfter} seconds`);
+        throw new RateLimitError(
+          config.message || `Too many requests. Please try again in ${retryAfter} seconds`
+        );
       }
+
+      // Record request in current bucket.
+      const pipeline2 = redis.pipeline();
+      pipeline2.incrby(keyCurr, weight);
+      const ttlSecondsCurr = Math.ceil((windowMs - (now - bucketStart)) / 1000);
+      pipeline2.expire(keyCurr, ttlSecondsCurr, 'GT');
+      // Ensure prev bucket doesn't linger forever if we're late into the window.
+      const ttlSecondsPrev = Math.ceil((windowMs - (now - prevBucketStart)) / 1000);
+      if (ttlSecondsPrev > 0) {
+        pipeline2.expire(keyPrev, ttlSecondsPrev, 'GT');
+      }
+      // Execute and ignore results.
+      await pipeline2.exec();
 
       return next();
     } catch (error) {

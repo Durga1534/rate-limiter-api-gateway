@@ -73,31 +73,63 @@ async function checkPeriodLimit(
     };
   }
 
-  const bucket = getBucketTimestamp(period);
-  const resetTime = getResetTime(period);
+  const now = Date.now();
+  const currBucket = getBucketTimestamp(period);
+  const currBucketStart = currBucket.getTime();
 
-  // Find or create usage record
-  let usage = await prisma.usage.findFirst({
-    where: {
-      apiKeyId,
-      peroid: period,
-      timestampBucket: bucket,
-    },
-  });
+  // Approximate window length from the period granularity.
+  const periodMs = period === 'MINUTE' ? 60_000 : period === 'HOUR' ? 3_600_000 : 86_400_000;
+  const prevBucketStart = currBucketStart - periodMs;
+  const resetTime = new Date(currBucketStart + periodMs);
 
-  if (!usage) {
-    usage = await prisma.usage.create({
+  // Find/create current & previous usage records.
+  let [currUsage, prevUsage] = await Promise.all([
+    prisma.usage.findFirst({
+      where: {
+        apiKeyId,
+        peroid: period,
+        timestampBucket: currBucket,
+      },
+    }),
+    prisma.usage.findFirst({
+      where: {
+        apiKeyId,
+        peroid: period,
+        timestampBucket: new Date(prevBucketStart),
+      },
+    }),
+  ]);
+
+  if (!currUsage) {
+    currUsage = await prisma.usage.create({
       data: {
         apiKeyId,
         peroid: period,
-        timestampBucket: bucket,
+        timestampBucket: currBucket,
         requestCount: 0,
       },
     });
   }
 
-  const remaining = Math.max(0, limit - usage.requestCount);
-  const isAllowed = usage.requestCount < limit;
+  if (!prevUsage) {
+    prevUsage = await prisma.usage.create({
+      data: {
+        apiKeyId,
+        peroid: period,
+        timestampBucket: new Date(prevBucketStart),
+        requestCount: 0,
+      },
+    });
+  }
+
+  const elapsedInCurr = now - currBucketStart; // [0..periodMs)
+  const fractionCurr = Math.max(0, Math.min(1, elapsedInCurr / periodMs));
+  const fractionPrev = 1 - fractionCurr;
+
+  // Sliding window estimate.
+  const estimatedUsed = currUsage.requestCount + prevUsage.requestCount * fractionPrev;
+  const remaining = Math.max(0, Math.ceil(limit - estimatedUsed));
+  const isAllowed = estimatedUsed + 1 <= limit;
 
   return {
     isAllowed,
