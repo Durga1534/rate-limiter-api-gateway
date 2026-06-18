@@ -1,5 +1,39 @@
-node_modules
-# Keep environment variables out of version control
-.env
+# Dependencies
+node_modules/
+package-lock.json
 
-/generated/prisma
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Generated files
+/generated/
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+
+# Runtime
+tmp/
+temp/
+*.pid
+*.seed

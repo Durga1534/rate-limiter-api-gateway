@@ -16,10 +16,17 @@ export interface RouteRateLimit {
 }
 
 /**
- * In-memory cache for route-specific limits
- * In production, this would be in Redis
+ * In-memory cache for route-specific limits.
+ * Sliding window approximation using two adjacent buckets.
  */
-const routeLimitCache = new Map<string, { count: number; resetTime: number }>();
+const routeLimitCache = new Map<
+  string,
+  { currCount: number; prevCount: number; currBucketStart: number; prevBucketStart: number }
+>();
+
+function getBucketStart(now: number, windowMs: number): number {
+  return Math.floor(now / windowMs) * windowMs;
+}
 
 /**
  * Create a route-specific rate limiter
@@ -43,44 +50,64 @@ export function createRouteRateLimiter(routeLimits: RouteRateLimit[]) {
         return next();
       }
 
-      // Create a route-specific cache key
-      const cacheKey = `${apiKeyId}:${routePath}`;
       const now = Date.now();
 
-      // Check minute limit
+      // Sliding window only implemented for requestsPerMinute (current router uses minute)
       if (matchedLimit.requestsPerMinute) {
-        const key = `${cacheKey}:minute`;
-        const record = routeLimitCache.get(key);
+        const windowMs = 60 * 1000;
+        const bucketStart = getBucketStart(now, windowMs);
+        const prevBucketStart = bucketStart - windowMs;
 
-        if (!record || record.resetTime < now) {
-          routeLimitCache.set(key, {
-            count: 1,
-            resetTime: now + 60 * 1000,
-          });
-        } else {
-          record.count++;
-          if (record.count > matchedLimit.requestsPerMinute) {
-            const retryAfter = Math.ceil((record.resetTime - now) / 1000);
-            res.set('Retry-After', retryAfter.toString());
-            throw new RateLimitError(
-              `Rate limit exceeded for this endpoint. Try again in ${retryAfter} seconds`
-            );
-          }
+        const cacheKeyCurr = `${apiKeyId}:${routePath}:minute:${bucketStart}`;
+        const cacheKeyPrev = `${apiKeyId}:${routePath}:minute:${prevBucketStart}`;
+
+        const currCount = routeLimitCache.get(cacheKeyCurr)?.currCount ?? 0;
+        const prevCount = routeLimitCache.get(cacheKeyPrev)?.prevCount ?? 0;
+
+        const fractionPrev = (bucketStart + windowMs - now) / windowMs; // 1..0
+        const estimatedUsed = currCount + prevCount * Math.max(0, Math.min(1, fractionPrev));
+        const nextCount = estimatedUsed + 1;
+
+        const limit = matchedLimit.requestsPerMinute;
+        if (nextCount > limit) {
+          const resetTime = bucketStart + windowMs;
+          const retryAfter = Math.ceil((resetTime - now) / 1000);
+          res.set('Retry-After', retryAfter.toString());
+          throw new RateLimitError(
+            `Rate limit exceeded for this endpoint. Try again in ${retryAfter} seconds`
+          );
         }
+
+        // Record into current bucket (simple in-memory)
+        routeLimitCache.set(cacheKeyCurr, {
+          currCount: currCount + 1,
+          prevCount: prevCount,
+          currBucketStart: bucketStart,
+          prevBucketStart,
+        });
       }
 
-      // Set rate limit headers based on route limits
+      // Set headers based on current estimate for the minute window
       if (matchedLimit.requestsPerMinute) {
-        const key = `${cacheKey}:minute`;
-        const record = routeLimitCache.get(key);
-        if (record) {
-          res.set('X-RateLimit-Limit', matchedLimit.requestsPerMinute.toString());
-          res.set(
-            'X-RateLimit-Remaining',
-            Math.max(0, matchedLimit.requestsPerMinute - record.count).toString()
-          );
-          res.set('X-RateLimit-Reset', record.resetTime.toString());
-        }
+        const windowMs = 60 * 1000;
+        const bucketStart = getBucketStart(now, windowMs);
+        const prevBucketStart = bucketStart - windowMs;
+
+        const cacheKeyCurr = `${apiKeyId}:${routePath}:minute:${bucketStart}`;
+        const cacheKeyPrev = `${apiKeyId}:${routePath}:minute:${prevBucketStart}`;
+
+        const currCount = routeLimitCache.get(cacheKeyCurr)?.currCount ?? 0;
+        const prevCount = routeLimitCache.get(cacheKeyPrev)?.prevCount ?? 0;
+
+        const fractionPrev = (bucketStart + windowMs - now) / windowMs;
+        const estimatedUsed = currCount + prevCount * Math.max(0, Math.min(1, fractionPrev));
+
+        const limit = matchedLimit.requestsPerMinute;
+        const remaining = Math.max(0, Math.ceil(limit - estimatedUsed));
+
+        res.set('X-RateLimit-Limit', limit.toString());
+        res.set('X-RateLimit-Remaining', remaining.toString());
+        res.set('X-RateLimit-Reset', (bucketStart + windowMs).toString());
       }
 
       next();
@@ -139,7 +166,8 @@ export function getRouteLimit(path: string, limits: RouteRateLimit[]): RouteRate
 export function cleanupRouteLimitCache(): void {
   const now = Date.now();
   for (const [key, record] of routeLimitCache.entries()) {
-    if (record.resetTime < now) {
+    // remove entries older than 5 minutes based on current bucket start
+    if (record.currBucketStart + 5 * 60 * 1000 < now) {
       routeLimitCache.delete(key);
     }
   }
@@ -147,3 +175,4 @@ export function cleanupRouteLimitCache(): void {
 
 // Cleanup every 5 minutes
 setInterval(cleanupRouteLimitCache, 5 * 60 * 1000);
+
