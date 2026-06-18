@@ -1,676 +1,228 @@
 # 🚦 Rate Limiting API Gateway
 
+A backend API gateway with JWT authentication, dynamic API key management, and **distributed sliding-window rate limiting** enforced across Redis, PostgreSQL, and in-memory layers — built with Express, TypeScript, and Prisma.
 
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-5-black.svg)](https://expressjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Prisma-336791.svg)](https://www.prisma.io/)
+[![Redis](https://img.shields.io/badge/Redis-Upstash-DC382D.svg)](https://upstash.com/)
+[![Tests](https://img.shields.io/badge/tests-jest-C21325.svg)](https://jestjs.io/)
 
-A **production-grade API Gateway** built with modern backend technologies, demonstrating enterprise-level authentication, rate limiting, and observability practices.
+## Table of Contents
 
-
-
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
-
-[![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)](https://expressjs.com/)
-
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-
-[![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
-
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
-
-
-
----
-
-
-
-## 📋 Overview
-
-
-
-This project showcases real-world backend engineering skills with a focus on **security**, **scalability**, and **observability**. Built for high-traffic scenarios, it implements JWT authentication, Redis-backed rate limiting, and comprehensive logging—all containerized for easy deployment.
-
-
-
-**Perfect for**: Demonstrating backend expertise to recruiters and technical interviewers.
-
-
+- [Why This Project Exists](#why-this-project-exists)
+- [From Fixed Window to Sliding Window](#from-fixed-window-to-sliding-window)
+- [Rate Limiting Architecture](#rate-limiting-architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Routes](#api-routes)
+- [Resilience](#resilience)
+- [Testing](#testing)
+- [Scripts](#scripts)
+- [Author](#author)
 
 ---
 
+## Why This Project Exists
 
+Most rate limiter tutorials use a single in-memory counter that resets at a fixed clock boundary. That breaks in two common ways: it doesn't survive across multiple server instances, and it lets a client burst through the limit by timing requests around the window edge — for example, sending the full quota right before a minute ticks over, then the full quota again right after.
 
-## ✨ Key Features
-
-
-
-### 🔐 Authentication & Authorization
-
-- **Secure User Registration** with bcrypt password hashing
-
-- **JWT-based Authentication** for protected routes
-
-- **Dual Access Control**:
-
-  - User authentication via JWT tokens
-
-  - API access via secure API keys
-
-- **Middleware Protection** with token validation and expiration handling
-
-- Centralized error handling for auth failures
-
-
-
-### 🔑 API Key Management
-
-- Secure API key generation and validation
-
-- Stateless API access design for horizontal scaling
-
-- Foundation for key rotation and per-key policies
-
-- Isolated key management from user authentication
-
-
-
-### ⚡ Rate Limiting
-
-- **Redis-backed** for distributed rate limiting across multiple instances
-
-- **Multiple Identifier Types**:
-
-  - IP-based rate limiting
-
-  - API key-based rate limiting
-
-  - Custom identifier support
-
-- **Advanced Features**:
-
-  - Weighted request counting
-
-  - Per-route rate limit configuration
-
-  - Graceful degradation when Redis is unavailable
-
-- Cluster-safe implementation
-
-
-
-### 📊 Observability & Reliability
-
-- **Structured Logging** with Winston
-
-- Request tracing with unique request IDs
-
-- Comprehensive logging: method, path, status, duration
-
-- **Sentry Integration** for centralized error tracking
-
-- **Health Check Endpoint** (`GET /health`)
-
-  - Redis connectivity status
-
-  - Application uptime
-
-  - Service health metrics
-
-
-
-### 🐳 Infrastructure & DevOps
-
-- **Fully Dockerized** application
-
-- **Docker Compose** orchestration for:
-
-  - API service
-
-  - Redis cache
-
-  - PostgreSQL database
-
-- Environment variable validation on startup
-
-- Graceful shutdown handling (SIGTERM/SIGINT)
-
-- Proxy-aware IP handling with `TRUST_PROXY` support
-
-- Production-ready configuration
-
-
+This gateway addresses both problems: Redis makes the counter shared across instances, and a sliding-window-counter algorithm removes the boundary-burst gap by blending a time-weighted portion of the previous window into every check.
 
 ---
 
+## From Fixed Window to Sliding Window
 
+The first version of this rate limiter used a fixed window: requests were counted in buckets aligned to clock boundaries (`Math.floor(now / windowMs) * windowMs`), and the counter reset hard at each boundary. That's simple and fast, but it has a known weakness — a client can send a full burst at `59.9s` and another full burst at `60.1s`, doubling the effective limit within a 200ms span, because the two bursts land in different buckets.
 
-## 🛠️ Tech Stack
+The current version replaces this with a **sliding-window counter**: each check reads both the current bucket and the previous bucket, then estimates actual usage as
 
+```
+estimated = countCurrent + countPrevious × (1 − elapsedFractionOfCurrentWindow)
+```
 
+A request right after a bucket boundary still gets charged for most of the previous bucket's usage, which closes the burst gap without the cost of storing a full sliding log of every request timestamp (the more expensive alternative). This same pattern is applied consistently in three places:
 
-| Category | Technologies |
-
-|----------|-------------|
-
-| **Runtime** | Node.js, TypeScript |
-
-| **Framework** | Express.js |
-
-| **Database** | PostgreSQL with Prisma ORM |
-
-| **Cache** | Redis |
-
-| **Security** | JWT, bcrypt |
-
-| **Logging** | Winston |
-
-| **Monitoring** | Sentry |
-
-| **DevOps** | Docker, Docker Compose |
-
-
+| Layer | File | Backing Store |
+|---|---|---|
+| Global / per-route Redis limiter | `middlewares/rateLimiter.ts` | Redis (`ioredis`, pipelined `GET`s) |
+| Per-plan API key limiter | `services/rateLimitService.ts` | PostgreSQL (Prisma) |
+| Route-specific limiter | `middlewares/routeRateLimiter.ts` | In-process `Map` |
 
 ---
 
+## Rate Limiting Architecture
 
+Three independent layers enforce limits at different scopes, each using the sliding-window approach above:
 
-## �️ Quick Start
+**Redis-backed global limiter** — applied per IP or per API key, using Redis pipelines (`GET` current + previous bucket, then `INCRBY` + `EXPIRE`) so checks are atomic and safe across multiple server instances. Supports weighted requests, so an expensive endpoint can cost more than 1 unit per call.
 
+**Database per-plan limiter** — each API key belongs to a plan with separate minute/hour/day limits. PostgreSQL is the source of truth here since plan limits need to survive restarts and be queryable for billing/usage reporting, not just enforced in the hot path.
 
+**In-memory route limiter** — route-specific overrides (e.g. a stricter limit on `/upload` than on `/ping`) matched by regex pattern, backed by a local `Map` with periodic cleanup. This layer trades cross-instance consistency for near-zero latency, since route-specific limits are a secondary check layered on top of the Redis/DB limits, not the only line of defense.
 
-### Using Docker (Recommended)
-
-
-
-```bash
-
-# Clone the repository
-
-git clone <repository-url>
-
-cd rate-limiting-api
-
-
-
-# Start all services
-
-docker-compose up --build
-
-
-
-# The API will be available at http://localhost:5050
-
-```
-
-
-
-### Manual Setup
-
-
-
-```bash
-
-# Install dependencies
-
-npm install
-
-
-
-# Set up environment variables
-
-cp .env.example .env
-
-# Edit .env with your configuration
-
-
-
-# Set up database
-
-npx prisma migrate dev
-
-npx prisma generate
-
-
-
-# Start Redis (required for rate limiting)
-
-redis-server
-
-
-
-# Start development server
-
-npm run dev
-
-```
-
-
+Every check sets `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers; exceeded limits also set `Retry-After`.
 
 ---
 
+## Tech Stack
 
-
-## 🚀 Local Development Setup
-
-
-
-### Installation
-
-
-
-1. **Clone the repository**
-
-```bash
-
-git clone https://github.com/yourusername/rate-limiting-api-gateway.git
-
-cd rate-limiting-api-gateway
-
-```
-
-
-
-2. **Configure environment variables**
-
-```bash
-
-cp .env.example .env
-
-# Edit .env with your configuration
-
-```
-
-
-
-3. **Start the services**
-
-```bash
-
-docker compose up -d --build
-
-```
-
-
-
-4. **Verify the application is running**
-
-```bash
-
-curl http://localhost:5050/health
-
-```
-
-
-
-The API will be available at `http://localhost:5050`
-
-
+| Layer | Technology | Why |
+|---|---|---|
+| Runtime | Node.js, TypeScript | Type safety across the request pipeline |
+| Web framework | Express 5 | Middleware-first request handling |
+| Database | PostgreSQL + Prisma | Relational plan/usage data, migrations |
+| Cache / limiter store | Redis (Upstash, via `ioredis`) | Shared counters across instances |
+| Auth | JWT (`jsonwebtoken`), `bcryptjs` | Stateless session auth, hashed credentials |
+| Observability | Winston (structured JSON logs) + Sentry | Local/file logging plus error tracking |
+| Docs | `swagger-ui-express` + OpenAPI spec | Live API docs at `/docs` |
+| Security | Helmet, CORS | Standard HTTP hardening |
+| Testing | Jest | Unit tests for limiter and health logic |
 
 ---
 
-
-
-## 📚 Complete Documentation
-
-Start here based on your needs:
-
-### Getting Started
-- **[SETUP.md](./SETUP.md)** - 📖 Local development setup guide (5 min quick start)
-- **[API_EXAMPLES.md](./API_EXAMPLES.md)** - 💻 Complete API examples (curl, JavaScript, Python)
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - 🏗️ System architecture and design patterns
-
-### For Developers
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - 🤝 How to contribute to the project
-- **[API_ROUTES.md](./API_ROUTES.md)** - 📡 API endpoint reference
-- **[RATE_LIMITER_EXAMPLES.md](./RATE_LIMITER_EXAMPLES.md)** - ⚡ Rate limiting configuration
-
-### Deployment & Production
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - 🚀 Production deployment guide (AWS, GCP, Heroku, Docker)
-- **[PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md)** - ✅ Pre-deployment verification
-- **[PERFORMANCE.md](./PERFORMANCE.md)** - 🚄 Performance optimization and scaling guide
-
-### Reference
-- **[SECURITY.md](./SECURITY.md)** - 🔐 Security best practices and policies
-- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - 🔧 Common issues and solutions
-- **[LICENSE](./LICENSE)** - 📄 MIT License
-
----
-
-## 📊 Documentation
-
-
-
----
-
-
-
-## 📡 API Quick Start
-
-
-
-### 1. Register a User
-
-```bash
-
-curl -X POST http://localhost:5050/api/v1/auth/register \
-
-  -H "Content-Type: application/json" \
-
-  -d '{"name":"John Doe","email":"john@example.com","password":"Password123!"}'
+## Project Structure
 
 ```
-
-
-
-### 2. Login to Get JWT Token
-
-```bash
-
-curl -X POST http://localhost:5050/api/v1/auth/login \
-
-  -H "Content-Type: application/json" \
-
-  -d '{"email":"john@example.com","password":"Password123!"}'
-
-```
-
-
-
-### 3. Create API Key
-
-```bash
-
-curl -X POST http://localhost:5050/api/v1/api-keys \
-
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-
-  -H "Content-Type: application/json" \
-
-  -d '{"name":"My API Key","planId":"basic"}'
-
-```
-
-
-
-### 4. Use API Key for Requests
-
-```bash
-
-curl -X GET http://localhost:5050/api/v1/api/ping \
-
-  -H "X-API-Key: sk_live_YOUR_API_KEY"
-
-```
-
-
-
-📖 **For complete API documentation, see [API_ROUTES.md](./API_ROUTES.md)**
-
-
-
-### User Login
-
-```bash
-
-POST /api/auth/login
-
-Content-Type: application/json
-
-
-
-{
-
-  "email": "user@example.com",
-
-  "password": "securePassword123"
-
-}
-
-```
-
-
-
-### Access Protected Routes (JWT)
-
-```bash
-
-GET /api/protected/resource
-
-Authorization: Bearer <YOUR_JWT_TOKEN>
-
-```
-
-
-
-### Access API Endpoints (API Key)
-
-```bash
-
-GET /api/data
-
-x-api-key: <YOUR_API_KEY>
-
-```
-
-
-
-### Health Check
-
-```bash
-
-GET /health
-
-```
-
-
-
----
-
-
-
-## 📁 Project Structure
-
-
-
-```
-
-rate-limiting-api-gateway/
-
-├── src/
-
-│   ├── controllers/       # Request handlers
-
-│   ├── routes/           # API route definitions
-
-│   ├── services/         # Business logic
-
-│   ├── middlewares/      # Auth, rate limiting, logging
-
-│   ├── utils/            # Helper functions
-
-│   ├── app.ts            # Express app configuration
-
-│   └── server.ts         # Entry point
-
+rate-limiter-api-gateway/
+├── controllers/        # authController, apiKeyController
+├── middlewares/
+│   ├── rateLimiter.ts        # Redis sliding-window limiter (global + API key)
+│   ├── routeRateLimiter.ts   # In-memory sliding-window limiter (per-route)
+│   ├── apiKeyAuth.ts         # JWT + API key auth middleware
+│   ├── cache.ts
+│   ├── errorHandler.ts
+│   ├── requestLogger.ts
+│   └── swagger.ts
+├── routes/              # auth, apiKey, protected, health
+├── services/            # authService, apiKeyService, rateLimitService
+├── utils/                # logger (Winston), env (Zod-validated), redis, errors
 ├── prisma/
-
-│   └── schema.prisma     # Database schema
-
-├── docs/                 # Additional documentation
-
-├── docker-compose.yml    # Service orchestration
-
-├── Dockerfile            # Container configuration
-
-└── README.md
-
+│   ├── schema.prisma
+│   └── migrations/
+├── tests/
+├── docs/openapi.yaml
+├── Dockerfile
+└── docker-compose.yml
 ```
 
+---
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- A PostgreSQL instance (local or hosted)
+- An Upstash Redis instance (REST API, not a raw connection string)
+
+### Docker
+
+```bash
+git clone https://github.com/Durga1534/rate-limiter-api-gateway.git
+cd rate-limiter-api-gateway
+docker-compose up --build
+```
+
+### Manual setup
+
+```bash
+npm install
+cp .env.example .env   # fill in the variables below
+npx prisma migrate dev
+npx prisma generate
+npm run dev
+```
 
 ---
 
+## Environment Variables
 
+```env
+# Application
+NODE_ENV=development
+PORT=5050
 
-## 🎯 Why This Project?
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/gateway_db
 
+# Redis (Upstash REST API)
+UPSTASH_REDIS_REST_URL=https://your-instance.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
+REDIS_HEALTH_CHECK_INTERVAL=30
 
+# JWT
+JWT_SECRET=at_least_32_characters_long_secret
+JWT_EXPIRES_IN=7d
 
-This project demonstrates **production-level backend engineering skills**:
+# Sentry (optional)
+SENTRY_DSN=
+SENTRY_TRACES_SAMPLE_RATE=0.1
 
+# CORS / Logging
+CORS_ORIGIN=http://localhost:3000
+LOG_LEVEL=info
+```
 
-
-✅ **Security-First Design** - JWT authentication, bcrypt hashing, secure API keys  
-
-✅ **Scalable Architecture** - Redis-backed rate limiting, stateless design  
-
-✅ **Clean Code** - TypeScript, separation of concerns, middleware patterns  
-
-✅ **Observability** - Structured logging, error tracking, health checks  
-
-✅ **DevOps Ready** - Dockerized, environment validation, graceful shutdown  
-
-✅ **Best Practices** - Type safety, error handling, proxy awareness
-
-
-
-Perfect for demonstrating skills in:
-
-- Backend API development
-
-- Authentication & authorization systems
-
-- Distributed systems design
-
-- Database modeling with ORMs
-
-- Caching strategies
-
-- Container orchestration
-
-- Production monitoring
-
-
+All variables are validated at startup with a Zod schema (`utils/env.ts`) — the process exits immediately with a clear error if something required is missing, rather than failing later with an unrelated error.
 
 ---
 
+## API Routes
 
-
-## 🔮 Roadmap
-
-
-
-### Planned Improvements
-
-- [ ] Multiple rate limiting strategies (sliding window, token bucket)
-
-- [ ] Per-key rate limit policies and quotas
-
-- [ ] Usage analytics and metrics dashboard
-
-- [ ] CI/CD pipeline (GitHub Actions)
-
-- [ ] Comprehensive load testing suite
-
-- [ ] Cloud deployment guides (AWS, GCP, Azure)
-
-- [x] API documentation with Swagger/OpenAPI
-
-- [ ] WebSocket support with rate limiting
-
-- [ ] Multi-tenancy support
-
-- [ ] Monitoring dashboards (Grafana, Prometheus)
-
-
+| Method | Endpoint | Auth | Notes |
+|---|---|---|---|
+| POST | `/api/v1/auth/register` | None | IP-limited (auth limiter) |
+| POST | `/api/v1/auth/login` | None | IP-limited (auth limiter) |
+| POST | `/api/v1/api-keys` | JWT | Create an API key |
+| GET | `/api/v1/api-keys` | JWT | List your API keys |
+| POST | `/api/v1/api-keys/:keyId/revoke` | JWT | Revoke a key |
+| POST | `/api/v1/api-keys/:keyId/regenerate` | JWT | Rotate a key |
+| DELETE | `/api/v1/api-keys/:keyId` | JWT | Delete a key permanently |
+| GET / POST | `/api/v1/ping` | API key | Sliding-window limited (global + route) |
+| GET | `/api/v1/ping/stats` | API key | Usage stats for the authenticated key |
+| GET | `/health` | None | Redis connectivity + uptime |
+| GET | `/docs` | None | Swagger UI |
 
 ---
 
+## Resilience
 
-
-
-
-## What I Learned
-
-
-
-- Designing stateless APIs for horizontal scalability
-
-- Implementing secure authentication and authorization flows
-
-- Handling rate limiting in distributed systems
-
-- Structuring backend code for maintainability and growth
-
-- Writing production-grade logging and error handling
-
-
-
-
+| Failure | Behavior |
+|---|---|
+| Redis unreachable | Health check reports it (`/health`); limiter calls will throw rather than silently allow unlimited traffic — failing closed on the hot path |
+| Invalid payload | Rejected by Zod validation before reaching a controller |
+| Missing/expired JWT | `401` from auth middleware before any route logic runs |
+| Sentry DSN not set | Sentry initialization is skipped; app still runs normally |
 
 ---
 
+## Testing
 
+```bash
+npm test
+```
 
-
-
-## 📝 License
-
-
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-
+Current suite covers the health endpoint and basic app wiring (`tests/basic.test.ts`, `tests/lightweight-health.test.ts`). The sliding-window math itself doesn't have a dedicated boundary test yet — that's a known gap, not an oversight being hidden: the next addition planned is a test that simulates a burst split across a bucket boundary and asserts it gets throttled correctly under the sliding-window estimate, which is the actual scenario the fixed-window version got wrong.
 
 ---
 
+## Scripts
 
-
-## 🤝 Contributing
-
-
-
-Contributions, issues, and feature requests are welcome!
-
-
-
----
-
-
-
-## 📧 Contact
-
-
-
-**Konduru Durga Prasad**  
-
-Email: kondurudurgaprasad.2@gmail.com  
-
-LinkedIn: [linkedin.com/in/durgaprasad23](https://www.linkedin.com/in/durgaprasad23/)  
-
-GitHub: [@Durga1534](https://github.com/Durga1534)
-
-
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Run locally with live reload |
+| `npm run build` | Compile TypeScript to `/dist` |
+| `npm test` | Run Jest suite |
+| `npm run lint` | Run ESLint |
 
 ---
 
+## Author
 
+**Konduru Durga Prasad** — Backend-focused Full Stack Engineer, Bangalore, India
 
-## 🌟 Show Your Support
-
-
-
-If you found this project helpful, please consider giving it a ⭐️!
-
-
-
----
-
-
-
-<div align="center">
-
-  <sub>Built with ❤️ by [Durga Prasad]</sub>
-
-</div>
-
+[GitHub](https://github.com/Durga1534) · [LinkedIn](https://www.linkedin.com/in/durga-prasad-konduru) · kondurudurgaprasad.2@gmail.com
